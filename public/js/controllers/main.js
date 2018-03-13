@@ -6,6 +6,14 @@ angular.module('deckController', [])
 			text: "4 Glint Hawk\r\n4 Kor Skyfisher\r\n3 Palace Sentinels\r\n4 Thraben Inspector\r\n2 Battle Screech\r\n1 Electrickery\r\n4 Galvanic Blast\r\n4 Lightning Bolt\r\n3 Prismatic Strands\r\n3 Alchemist's Vial\r\n4 Prophetic Prism\r\n3 Journey to Nowhere"
 		};
 		$scope.cardList = [];
+		$scope.manaAnalysis = {
+			whiteSources: 0,
+			blueSources: 0,
+			blackSources: 0,
+			redSources: 0,
+			greenSources: 0,
+			totalLands: 0
+		};
 
 		$scope.processDeckList = function () {
 
@@ -28,25 +36,39 @@ angular.module('deckController', [])
 			}
 		};
 
-		processCards = function (cardArray, callback) {
-			var itemsProcessed = 0;
-			console.log(cardArray.length);
-
-			cardArray.forEach(function(element) {
-				// Declare a newCard
-				var newCard = {
-					count: 0,
-					name: "",
-					manaCost: ""
-				};
-
-				// Parse the Row
-				newCard.count = element.substr(0, element.indexOf(' '));
-				newCard.name = element.substr(element.indexOf(' ') + 1);
-
-				// Card Lookup
-				Cards.get(newCard.name)
+		var fetchCard = function (name) {
+			return new Promise((resolve, reject) => {
+				Cards.get(name)
 					.success(function (card) {
+						resolve(card);
+					});
+			});
+		};
+
+		processCards = function (cardArray, callback) {
+
+			var cardNames = [];
+
+			cardArray.forEach(function (card) {
+				cardNames.push(card.substr(card.indexOf(' ') + 1));
+			});
+
+			itemPromises = cardNames.map(fetchCard);
+
+			Promise.all(itemPromises)
+				.then(function (results) {
+					// we only get here if ALL promises fulfill
+					results.forEach(function (card) {
+						// Declare a newCard
+						var newCard = {
+							count: 0,
+							name: "",
+							manaCost: ""
+						};
+
+						// newCard.count = element.substr(0, element.indexOf(' '));
+						newCard.name = card.name;
+						newCard.count = 3;
 						newCard.cmc = card.cmc;
 						newCard.manaCost = card.manaCost;
 						newCard.W = (newCard.manaCost.match(/W/g) || []).length;
@@ -57,14 +79,14 @@ angular.module('deckController', [])
 
 						// Add the card to the Deck 
 						$scope.cardList.push(newCard);
-
-						// Bit of a Hack...
-						itemsProcessed++;
-						if (itemsProcessed === cardArray.length) {
-							callback();
-						}
 					});
-			});
+
+					callback();
+				})
+				.catch(function (err) {
+					// Will catch failure of first failed promise
+					console.log("Failed:", err);
+				});
 		};
 
 		deckCheck = function () {
@@ -77,46 +99,39 @@ angular.module('deckController', [])
 				cardCount += cardToCount.count;
 			}
 
-			// How many lands can there be?
+			// How many lands slots are there?
 			// NOTE: Only 60-card decks are currently supported.
-			var lands = 60 - cardCount;
+			$scope.manaAnalysis.lands = 60 - cardCount;
 
 			// Check if a valid number of cards
-			if (lands > 27 || lands < 20)
+			if ($scope.manaAnalysis.lands > 27 || $scope.manaAnalysis.lands < 20)
 				alert("Invalid Land Count. Land total must be 20-27. Only 60-card decks are supported currently.");
 			else {
-				// Set max sources count for each color
-				var wMaxSources = 0;
-				var uMaxSources = 0;
-				var bMaxSources = 0;
-				var rMaxSources = 0;
-				var gMaxSources = 0;
-
 				// Loop through the cards to determine the max pip count for each color in the deck.
 				for (var j = 0; j < arrayLength; j++) {
-					var currentCard = deck.cards[j];
+					var currentCard = $scope.cardList[j];
 
 					// Calculate how many mana sources are needed of each color for a given card
-					var wManaSources = manaSourcesNeeded(lands, currentCard.cmc, currentCard.W);
-					var uManaSources = manaSourcesNeeded(lands, currentCard.cmc, currentCard.U);
-					var bManaSources = manaSourcesNeeded(lands, currentCard.cmc, currentCard.B);
-					var rManaSources = manaSourcesNeeded(lands, currentCard.cmc, currentCard.R);
-					var gManaSources = manaSourcesNeeded(lands, currentCard.cmc, currentCard.G);
+					var wManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.W);
+					var uManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.U);
+					var bManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.B);
+					var rManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.R);
+					var gManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.G);
 
 					// Determine the max mana sources needed for each color after each card
-					wMaxSources = Math.max(wMaxSources, wManaSources);
-					uMaxSources = Math.max(uMaxSources, uManaSources);
-					bMaxSources = Math.max(bMaxSources, bManaSources);
-					rMaxSources = Math.max(rMaxSources, rManaSources);
-					gMaxSources = Math.max(gMaxSources, gManaSources);
+					$scope.manaAnalysis.whiteSources = Math.max($scope.manaAnalysis.whiteSources, wManaSources);
+					$scope.manaAnalysis.blueSources = Math.max($scope.manaAnalysis.blueSources, uManaSources);
+					$scope.manaAnalysis.blackSources = Math.max($scope.manaAnalysis.blackSources, bManaSources);
+					$scope.manaAnalysis.redSources = Math.max($scope.manaAnalysis.redSources, rManaSources);
+					$scope.manaAnalysis.greenSources = Math.max($scope.manaAnalysis.greenSources, gManaSources);
 				}
 
-				console.log(wMaxSources + " White Sources Needed");
-				console.log(uMaxSources + " Blue Sources Needed");
-				console.log(bMaxSources + " Black Sources Needed");
-				console.log(rMaxSources + " Red Sources Needed");
-				console.log(gMaxSources + " Green Sources Needed");
-				console.log("In " + lands + " Land Slots");
+				console.log($scope.manaAnalysis.whiteSources + " White Sources Needed");
+				console.log($scope.manaAnalysis.blueSources + " Blue Sources Needed");
+				console.log($scope.manaAnalysis.blackSources + " Black Sources Needed");
+				console.log($scope.manaAnalysis.redSources + " Red Sources Needed");
+				console.log($scope.manaAnalysis.greenSources + " Green Sources Needed");
+				console.log("In " + $scope.manaAnalysis.lands + " Land Slots");
 			}
 		};
 
