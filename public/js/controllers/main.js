@@ -66,9 +66,11 @@ angular.module('deckController', [])
 							manaCost: ""
 						};
 
-						// newCard.count = element.substr(0, element.indexOf(' '));
+						var originalCard = cardArray.find(textCard => textCard.substr(textCard.indexOf(' ') + 1) == card.name);
+
+						// newCard.count = 
 						newCard.name = card.name;
-						newCard.count = 3;
+						newCard.count = parseInt(originalCard.substr(0, originalCard.indexOf(' ')));
 						newCard.cmc = card.cmc;
 						newCard.manaCost = card.manaCost;
 						newCard.W = (newCard.manaCost.match(/W/g) || []).length;
@@ -101,10 +103,10 @@ angular.module('deckController', [])
 
 			// How many lands slots are there?
 			// NOTE: Only 60-card decks are currently supported.
-			$scope.manaAnalysis.lands = 60 - cardCount;
+			$scope.manaAnalysis.totalLands = 60 - cardCount;
 
 			// Check if a valid number of cards
-			if ($scope.manaAnalysis.lands > 27 || $scope.manaAnalysis.lands < 20)
+			if ($scope.manaAnalysis.totalLands > 27 || $scope.manaAnalysis.totalLands < 20)
 				alert("Invalid Land Count. Land total must be 20-27. Only 60-card decks are supported currently.");
 			else {
 				// Loop through the cards to determine the max pip count for each color in the deck.
@@ -112,11 +114,11 @@ angular.module('deckController', [])
 					var currentCard = $scope.cardList[j];
 
 					// Calculate how many mana sources are needed of each color for a given card
-					var wManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.W);
-					var uManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.U);
-					var bManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.B);
-					var rManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.R);
-					var gManaSources = manaSourcesNeeded($scope.manaAnalysis.lands, currentCard.cmc, currentCard.G);
+					var wManaSources = manaSourcesNeeded($scope.manaAnalysis.totalLands, currentCard.cmc, currentCard.W);
+					var uManaSources = manaSourcesNeeded($scope.manaAnalysis.totalLands, currentCard.cmc, currentCard.U);
+					var bManaSources = manaSourcesNeeded($scope.manaAnalysis.totalLands, currentCard.cmc, currentCard.B);
+					var rManaSources = manaSourcesNeeded($scope.manaAnalysis.totalLands, currentCard.cmc, currentCard.R);
+					var gManaSources = manaSourcesNeeded($scope.manaAnalysis.totalLands, currentCard.cmc, currentCard.G);
 
 					// Determine the max mana sources needed for each color after each card
 					$scope.manaAnalysis.whiteSources = Math.max($scope.manaAnalysis.whiteSources, wManaSources);
@@ -125,13 +127,6 @@ angular.module('deckController', [])
 					$scope.manaAnalysis.redSources = Math.max($scope.manaAnalysis.redSources, rManaSources);
 					$scope.manaAnalysis.greenSources = Math.max($scope.manaAnalysis.greenSources, gManaSources);
 				}
-
-				console.log($scope.manaAnalysis.whiteSources + " White Sources Needed");
-				console.log($scope.manaAnalysis.blueSources + " Blue Sources Needed");
-				console.log($scope.manaAnalysis.blackSources + " Black Sources Needed");
-				console.log($scope.manaAnalysis.redSources + " Red Sources Needed");
-				console.log($scope.manaAnalysis.greenSources + " Green Sources Needed");
-				console.log("In " + $scope.manaAnalysis.lands + " Land Slots");
 			}
 
 			$scope.$apply()
