@@ -115,36 +115,43 @@
 			<div class="col"></div>
 		</div>
 		<div class="row">
-			<table class="table table-striped table-sm">
-				<thead>
-					<tr>
-						<th scope="col">Color</th>
-						<th scope="col">Sources</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<th scope="col">White</th>
-						<td scope="col">{{manaAnalysis.whiteSources}}</td>
-					</tr>
-					<tr>
-						<th scope="col">Blue</th>
-						<td scope="col">{{manaAnalysis.blueSources}}</td>
-					</tr>
-					<tr>
-						<th scope="col">Black</th>
-						<td scope="col">{{manaAnalysis.blackSources}}</td>
-					</tr>
-					<tr>
-						<th scope="col">Red</th>
-						<td scope="col">{{manaAnalysis.redSources}}</td>
-					</tr>
-					<tr>
-						<th scope="col">Green</th>
-						<td scope="col">{{manaAnalysis.greenSources}}</td>
-					</tr>
-				</tbody>
-			</table>
+			<div class="col"></div>
+			<div class="col-8">
+				<label for="manaTable" class="col-sm-12 col-form-label">
+					<b>Analysis Results</b>
+				</label>
+				<table id="manaTable" class="table table-striped table-sm">
+					<thead>
+						<tr>
+							<th scope="col">Color</th>
+							<th scope="col">Sources</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th scope="col">White</th>
+							<td scope="col">{{manaAnalysis.whiteSources}}</td>
+						</tr>
+						<tr>
+							<th scope="col">Blue</th>
+							<td scope="col">{{manaAnalysis.blueSources}}</td>
+						</tr>
+						<tr>
+							<th scope="col">Black</th>
+							<td scope="col">{{manaAnalysis.blackSources}}</td>
+						</tr>
+						<tr>
+							<th scope="col">Red</th>
+							<td scope="col">{{manaAnalysis.redSources}}</td>
+						</tr>
+						<tr>
+							<th scope="col">Green</th>
+							<td scope="col">{{manaAnalysis.greenSources}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="col"></div>
 		</div>
 	</main>
 </body>

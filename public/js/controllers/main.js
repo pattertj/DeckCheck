@@ -133,6 +133,8 @@ angular.module('deckController', [])
 				console.log($scope.manaAnalysis.greenSources + " Green Sources Needed");
 				console.log("In " + $scope.manaAnalysis.lands + " Land Slots");
 			}
+
+			$scope.$apply()
 		};
 
 		function manaSourcesNeeded(land, turn, pips) {
